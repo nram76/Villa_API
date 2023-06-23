@@ -16,7 +16,8 @@ namespace VillaAPI.Controllers
             return Ok(VillaStore.villaList);
         }
         // can set response types with eacth endpoint
-        [HttpGet("id:int")]
+        // Name = assigns route name for reference
+        [HttpGet("id:int", Name = "GetVilla")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -37,9 +38,22 @@ namespace VillaAPI.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<VillaDTO> CreateVilla([FromBody]VillaDTO villaDTO) 
         {
+            // checks if model is incorrect
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+            // custom validation for model schema
+            if(VillaStore.villaList.FirstOrDefault(u=>u.Name.ToLower() == villaDTO.Name.ToLower()) != null) 
+            {
+                // declaring a custom error
+                ModelState.AddModelError("Model Error", "Villa already exists!");
+                return BadRequest(ModelState);
+            }
             if (villaDTO == null)
             {
                 return BadRequest(villaDTO);
@@ -51,7 +65,32 @@ namespace VillaAPI.Controllers
             villaDTO.Id = VillaStore.villaList.OrderByDescending(u=>u.Id).FirstOrDefault().Id + 1;
             VillaStore.villaList.Add(villaDTO);
 
-            return Ok(villaDTO);
+            return CreatedAtRoute("GetVilla",new {id = villaDTO.Id},villaDTO);
         }
+
+        [HttpDelete("{id:int}", Name = "DeleteVilla")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult DeleteVilla(int id)
+        {
+            if (id == 0)
+            {
+                return BadRequest();
+            }
+            var villa = VillaStore.villaList.FirstOrDefault(u => u.Id == id);
+            if (villa == null) 
+            {
+                return NotFound();
+            }
+            VillaStore.villaList.Remove(villa);
+
+            return NoContent();
+
+        }
+
+        [HttpPut]
+
+
     }
 }

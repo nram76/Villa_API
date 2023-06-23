@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using VillaAPI.Data;
-using VillaAPI.Logging;
 using VillaAPI.Models;
 using VillaAPI.Models.Dto;
 
@@ -10,20 +9,13 @@ namespace VillaAPI.Controllers
     [ApiController]
     [Route("api/VillaAPI")]
     public class VillaAPIController : ControllerBase
-
     {
-        // Injects logger into API controller
-        private readonly ILogging _logger;
-        public VillaAPIController(ILogging logger)
-        {
-            _logger = logger;
-        }
+        public VillaAPIController() {}
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
         {
-            _logger.Log("Getting All Villas", "");
             return Ok(VillaStore.villaList);
         }
         // can set response types with eacth endpoint
@@ -36,7 +28,6 @@ namespace VillaAPI.Controllers
         {
             if (id == 0)
             {
-                _logger.Log("Get Villa Error with Id" + id, "error");
                 return BadRequest();
             }       
             var villa = (VillaStore.villaList.FirstOrDefault(u => u.Id == id));

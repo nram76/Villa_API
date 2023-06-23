@@ -1,10 +1,17 @@
+using Microsoft.EntityFrameworkCore;
 using Serilog;
+using VillaAPI.Data;
 using VillaAPI.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// how to add DBContext from appsettings.json
+builder.Services.AddDbContext<AppDBContext>(option =>
+{
+    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
+});
 builder.Services.AddControllers(option =>
 {
     //option.ReturnHttpNotAcceptable = true;
